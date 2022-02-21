@@ -1,3 +1,4 @@
+from matplotlib.style import available
 import numpy as np
 from std_msgs.msg import String,Bool
 
@@ -15,6 +16,7 @@ class FSM:
         
         1. disarm =(/mission)====> arm
         """
+        avaliable_mission = ["arm"]
 
         ''' disarm ===> arm (by /mission_msgs from ground_station) '''  
         if data_hub.mission == "arm" and data_hub.transform_trigger:
@@ -27,9 +29,8 @@ class FSM:
             data_hub.pub2ground.publish(False)
             
 
-        else:
+        elif not data_hub.mission in avaliable_mission: 
 
-            # print("Invalid mission recieved. please input the avaliable mission")
             data_hub.transform_trigger = False # turn off the trigger
             
             # give the input permission to input the valid mission
@@ -46,6 +47,7 @@ class FSM:
         2. arm =(auto_disarm)=> disarm
         3. arm =(/mission)====> take_off
         """
+        available_mission = ["disarm","take_off"]
 
         ''' arm ===> disarm (by /mission_msgs from ground_station) '''  
         if data_hub.mission == "disarm" and data_hub.transform_trigger:
@@ -55,9 +57,7 @@ class FSM:
             data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
             
             # inputing mission is not avaliable until the mission "disarm" is done
-            permission = Bool()
-            permission.data = False
-            data_hub.pub2ground.publish(permission)
+            data_hub.pub2ground.publish(False)
 
         ''' arm ===> take_off (by /mission_msgs from ground_station) '''  
         if data_hub.mission == "take_off" and data_hub.transform_trigger:
@@ -70,9 +70,8 @@ class FSM:
             # inputing mission is not avaliable until the mission "take_off" is done
             data_hub.pub2ground.publish(False)
 
-        else:
+        elif not data_hub.mission in available_mission:
 
-            # print("Invalid mission recieved. please input the avaliable mission")
             data_hub.transform_trigger = False # turn off the trigger
             
             # give the input permission to input the valid mission
@@ -95,7 +94,7 @@ class FSM:
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("hold") # send a mission to trajectory
             
-            # inputing mission is not avaliable until the mission "disarm" is done
+            # inputing mission is not avaliable until the mission "take_off" is done
             data_hub.pub2ground.publish(False)
 
 
@@ -103,32 +102,43 @@ class FSM:
     def transform_hold(self,data_hub):
 
         """
-        State : 'arm'
+        State : 'hold'
         
-        1. arm =(/mission)====> disarm
-        2. arm =(auto_disarm)=> disarm
-        3. arm =(/mission)====> take_off
+        1. hold =(/mission)====> land
+        2. hold =(/mission)====> park
+        3. hold =(/mission)====> search 
         """
 
-        ''' arm ===> disarm (by /mission_msgs) '''  
-        if data_hub.mission == "disarm" and data_hub.transform_trigger:
+        available_mission = ["land","park","search"]
+
+        ''' hold ===> land (by /mission_msgs from ground station) '''  
+        if data_hub.mission == "land" and data_hub.transform_trigger:
 
             data_hub.transform_trigger = False # turn off the trigger
-            data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
+            data_hub.pub2trajec.publish("land") # send a mission to trajectory
             
-            # inputing mission is not avaliable until the mission "disarm" is done
+            # inputing mission is not avaliable until the mission "land" is done
             data_hub.pub2ground.publish(False)
 
-        ''' arm ===> take_off (by /mission_msgs) '''  
-        if data_hub.mission == "take_off" and data_hub.transform_trigger:
+        ''' arm ===> park (by /mission_msgs from ground station) '''  
+        if data_hub.mission == "park" and data_hub.transform_trigger:
 
             data_hub.transform_trigger = False # turn off the trigger
-            data_hub.pub2trajec.publish("take_off") # send a mission to trajectory
+            data_hub.pub2trajec.publish("park") # send a mission to trajectory
             
-            # inputing mission is not avaliable until the mission "take_off" is done
+            # inputing mission is not avaliable until the mission "park" is done
             data_hub.pub2ground.publish(False)
 
-        else:
+        ''' arm ===> search (by /mission_msgs from ground station) '''  
+        if data_hub.mission == "search" and data_hub.transform_trigger:
+
+            data_hub.transform_trigger = False # turn off the trigger
+            data_hub.pub2trajec.publish("search") # send a mission to trajectory
+            
+            # inputing mission is not avaliable until the mission "search" is done
+            data_hub.pub2ground.publish(False)
+
+        elif not data_hub.mission in available_mission:
 
             # print("Invalid mission recieved. please input the avaliable mission")
             data_hub.transform_trigger = False # turn off the trigger
@@ -139,39 +149,22 @@ class FSM:
 
 
     def transform_land(self,data_hub):
-        """
-        State : 'arm'
-        
-        1. arm =(/mission)====> disarm
-        2. arm =(auto_disarm)=> disarm
-        3. arm =(/mission)====> take_off
-        """
-        ''' arm ===> disarm (by /mission_msgs) '''  
-        if data_hub.mission == "disarm" and data_hub.transform_trigger:
 
+        """
+        State : 'land'
+        
+        1. land =(/is_done)====> disarm
+        """
+
+        ''' land ===> disarm (by /is_done from motion_controller) '''  
+        if data_hub.is_performing_action == False and data_hub.transform_trigger:
+
+            print("land ---> disarm")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
             
-            # inputing mission is not avaliable until the mission "disarm" is done
+            # inputing mission is not avaliable until the mission "land" is done
             data_hub.pub2ground.publish(False)
-
-        ''' arm ===> take_off (by /mission_msgs) '''  
-        if data_hub.mission == "take_off" and data_hub.transform_trigger:
-
-            data_hub.transform_trigger = False # turn off the trigger
-            data_hub.pub2trajec.publish("take_off") # send a mission to trajectory
-            
-            # inputing mission is not avaliable until the mission "take_off" is done
-            data_hub.pub2ground.publish(False)
-
-        else:
-
-            # print("Invalid mission recieved. please input the avaliable mission")
-            data_hub.transform_trigger = False # turn off the trigger
-            
-            # give the input permission to input the valid mission
-            data_hub.pub2ground.publish(True)
-
 
 
     def transform_state(self,data_hub):
@@ -194,12 +187,12 @@ class FSM:
         
         elif data_hub.cur_state == "hold":
         
-            pass
+            self.transform_hold(data_hub)
 
         
         elif data_hub.cur_state == "land":
         
-            pass
+            self.transform_land(data_hub)
 
         
         elif data_hub.cur_state == "park":

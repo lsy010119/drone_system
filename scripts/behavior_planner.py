@@ -18,7 +18,7 @@ class BehaviorPlanner:
         # init current state in fsm
         self.cur_state = "disarm"
         # init current mission performing
-        self.mission = None
+        self.mission = "disarm"
         # to prevent starting the same mission continuously
         self.transform_trigger = False
         # whether the drone is performing any action
