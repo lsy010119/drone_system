@@ -41,7 +41,8 @@ class BehaviorPlanner:
         # if recieved the msg, no action is performing now
         self.is_performing_action = False
         # if recieved the signal that had done the mission, the trigger turns on
-        self.transform_trigger = True
+        
+        self.pub2ground.publish(True)
         
 
 

@@ -24,7 +24,8 @@ class FSM:
             print("disarm ---> arm")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("arm") # send a mission to trajectory
-            
+            data_hub.cur_state = "arm" # update the current state
+
             # inputing mission is not avaliable until the mission "arm" is done
             data_hub.pub2ground.publish(False)
             
@@ -55,6 +56,7 @@ class FSM:
             print("arm ---> disarm")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
+            data_hub.cur_state = "disarm" # update the current state
             
             # inputing mission is not avaliable until the mission "disarm" is done
             data_hub.pub2ground.publish(False)
@@ -65,6 +67,8 @@ class FSM:
             print("arm ---> take_off")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("take_off") # send a mission to trajectory
+            data_hub.cur_state = "take_off" # update the current state
+
             data_hub.is_performing_action = True # the drone starts to performing an action
             
             # inputing mission is not avaliable until the mission "take_off" is done
@@ -93,7 +97,8 @@ class FSM:
             print("take_off ---> hold")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("hold") # send a mission to trajectory
-            
+            data_hub.cur_state = "hold" # update the current state
+
             # inputing mission is not avaliable until the mission "take_off" is done
             data_hub.pub2ground.publish(False)
 
@@ -116,6 +121,8 @@ class FSM:
 
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("land") # send a mission to trajectory
+            data_hub.cur_state = "land" # update the current state
+            data_hub.is_performing_action = True # the drone starts to performing an action
             
             # inputing mission is not avaliable until the mission "land" is done
             data_hub.pub2ground.publish(False)
@@ -125,7 +132,9 @@ class FSM:
 
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("park") # send a mission to trajectory
-            
+            data_hub.cur_state = "park" # update the current state
+            data_hub.is_performing_action = True # the drone starts to performing an action
+
             # inputing mission is not avaliable until the mission "park" is done
             data_hub.pub2ground.publish(False)
 
@@ -134,6 +143,8 @@ class FSM:
 
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("search") # send a mission to trajectory
+            data_hub.cur_state = "search" # update the current state
+            data_hub.is_performing_action = True # the drone starts to performing an action
             
             # inputing mission is not avaliable until the mission "search" is done
             data_hub.pub2ground.publish(False)
@@ -162,7 +173,8 @@ class FSM:
             print("land ---> disarm")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
-            
+            data_hub.cur_state = "disarm" # update the current state
+
             # inputing mission is not avaliable until the mission "land" is done
             data_hub.pub2ground.publish(False)
 
