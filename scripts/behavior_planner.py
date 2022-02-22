@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rospy
 import asyncio
 from fsm            import FSM
@@ -40,6 +41,7 @@ class BehaviorPlanner:
 
         # if recieved the msg, no action is performing now
         self.is_performing_action = False
+        print("action_done")
         # if recieved the signal that had done the mission, the trigger turns on
         
         self.pub2ground.publish(True)
@@ -77,7 +79,7 @@ class BehaviorPlanner:
 
             FSM().transform_state(self)
 
-            # print(self.cur_state+"             ",end="\r")
+            print(self.is_performing_action,end="\r")
             self.telem_rate.sleep()
 
         

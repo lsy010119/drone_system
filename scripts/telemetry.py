@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import asyncio
 import numpy as np
 import rospy
@@ -17,7 +18,7 @@ class Telemetry:
         rospy.init_node("telemetry")
         self.pub = rospy.Publisher("/sensor_msgs",Status,queue_size=1)
 
-        self.rate = BehaviorPlanner().telem_rate
+        self.rate = rospy.Rate(30)
         self.sensor_msgs = Status()
 
 

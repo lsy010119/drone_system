@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import asyncio
 import rospy
 
@@ -85,6 +86,7 @@ class MotionController:
                         await self.take_off()
 
                         self.pub2fsm.publish(True)
+                        
 
                     elif self.motion_command == "hold":
 

@@ -92,15 +92,15 @@ class FSM:
         """
 
         ''' take_off ===> hold (by /is_done from motion_controller) '''  
-        if data_hub.is_performing_action == False and data_hub.transform_trigger:
+        if data_hub.is_performing_action == False: # if take_off mission is done
 
             print("take_off ---> hold")
-            data_hub.transform_trigger = False # turn off the trigger
+            # data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("hold") # send a mission to trajectory
             data_hub.cur_state = "hold" # update the current state
 
             # inputing mission is not avaliable until the mission "take_off" is done
-            data_hub.pub2ground.publish(False)
+            # data_hub.pub2ground.publish(False)
 
 
 
@@ -119,6 +119,7 @@ class FSM:
         ''' hold ===> land (by /mission_msgs from ground station) '''  
         if data_hub.mission == "land" and data_hub.transform_trigger:
 
+            print("hold ---> land")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("land") # send a mission to trajectory
             data_hub.cur_state = "land" # update the current state
@@ -130,6 +131,7 @@ class FSM:
         ''' arm ===> park (by /mission_msgs from ground station) '''  
         if data_hub.mission == "park" and data_hub.transform_trigger:
 
+            print("hold ---> park")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("park") # send a mission to trajectory
             data_hub.cur_state = "park" # update the current state
@@ -141,6 +143,7 @@ class FSM:
         ''' arm ===> search (by /mission_msgs from ground station) '''  
         if data_hub.mission == "search" and data_hub.transform_trigger:
 
+            print("hold ---> search")
             data_hub.transform_trigger = False # turn off the trigger
             data_hub.pub2trajec.publish("search") # send a mission to trajectory
             data_hub.cur_state = "search" # update the current state
