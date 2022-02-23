@@ -1,4 +1,3 @@
-from matplotlib.style import available
 import numpy as np
 from std_msgs.msg import String,Bool
 
@@ -99,9 +98,6 @@ class FSM:
             data_hub.pub2trajec.publish("hold") # send a mission to trajectory
             data_hub.cur_state = "hold" # update the current state
 
-            # inputing mission is not avaliable until the mission "take_off" is done
-            # data_hub.pub2ground.publish(False)
-
 
 
     def transform_hold(self,data_hub):
@@ -171,15 +167,16 @@ class FSM:
         """
 
         ''' land ===> disarm (by /is_done from motion_controller) '''  
-        if data_hub.is_performing_action == False and data_hub.transform_trigger:
+        if data_hub.is_performing_action == False:
 
             print("land ---> disarm")
-            data_hub.transform_trigger = False # turn off the trigger
-            data_hub.pub2trajec.publish("disarm") # send a mission to trajectory
             data_hub.cur_state = "disarm" # update the current state
 
             # inputing mission is not avaliable until the mission "land" is done
             data_hub.pub2ground.publish(False)
+
+
+
 
 
     def transform_state(self,data_hub):

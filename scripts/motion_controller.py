@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import asyncio
 import rospy
 
 from mavsdk             import System
 from drone_system.msg   import Status
 from std_msgs.msg       import String,Bool,Float32MultiArray
-from mavsdk.offboard    import VelocityNedYaw,PositionNedYaw,OffboardError
+from mavsdk.offboard    import VelocityBodyYawspeed,VelocityNedYaw,PositionNedYaw,OffboardError
 
 
 class MotionController:
@@ -17,7 +17,8 @@ class MotionController:
         rospy.Subscriber("/trajec_msgs",Float32MultiArray,self.motion_update)
         self.pub2trajec = rospy.Publisher("/trajectory_request",Bool,queue_size=1)
         self.pub2fsm = rospy.Publisher("/is_done",Bool,queue_size=1)
-        
+        self.motion_rate = 10 #hz
+
         self.motion_command = None
 
         self.drone = System()
@@ -44,6 +45,7 @@ class MotionController:
         print("-- Starting offboard")
         await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
         await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,0,0))
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
         
         try:
             await self.drone.offboard.start()
@@ -59,9 +61,6 @@ class MotionController:
         
         print("Armed")
         await self.drone.action.arm()
-        print("initialize")
-        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
-        await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,0,0))
 
 
     async def disarm(self):
@@ -73,19 +72,22 @@ class MotionController:
     async def take_off(self):
 
         print("take_off")
-        await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,-10.0,0))
+        # await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,-2.0,0))
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,-2.0,0))
         await asyncio.sleep(5)
 
 
     async def hold(self):
 
-        print("hold")
-        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
-        await asyncio.sleep(1)
+        print("hold         ",end="\r")
+        # await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
+        await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0,0,0,0))
+        await asyncio.sleep(1/self.motion_rate)
     
     async def land(self):
 
         print("land")
+        await self.drone.action.land()
 
 
     async def trajectory_tracking(self,trajectory):
@@ -131,9 +133,16 @@ class MotionController:
 
                     elif self.motion_command == "hold":
 
-                        self.motion_command = None
+                        # self.motion_command = None
                         await self.hold()
                         # await self.is_done()
+
+
+                    elif self.motion_command == "land":
+
+                        self.motion_command = None
+                        await self.land()
+                        await self.is_done()
 
 
                 else: # if it is the mission requirs planning a trajectory

@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import rospy
-import asyncio
-from fsm            import FSM
+from fsm                import FSM
 from drone_system.msg   import Status
 from std_msgs.msg       import String
 from std_msgs.msg       import Bool
@@ -81,7 +80,7 @@ class BehaviorPlanner:
 
 
 if __name__ == "__main__":
-
+    
     rospy.init_node("data_hub")
     
     B = BehaviorPlanner()
