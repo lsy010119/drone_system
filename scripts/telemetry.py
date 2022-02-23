@@ -27,10 +27,10 @@ class Telemetry:
         # await self.drone.connect(system_address="serial:///dev/ttyUSB0:921600")
         await self.drone.connect(system_address="udp://:14540")
 
-        print("Connecting ...")
+        print("Connecting in telem...")
         async for state in self.drone.core.connection_state():
             if state.is_connected:
-                print(f"Connected              ",end="\r")
+                print(f"Connected in telem             ",end="\r")
                 break
         
         async for posvelned in self.drone.telemetry.position_velocity_ned():
@@ -40,6 +40,8 @@ class Telemetry:
             self.sensor_msgs.pos_d = posvelned.position.down_m
             self.sensor_msgs.vel_n = posvelned.velocity.north_m_s
             self.sensor_msgs.vel_e = posvelned.velocity.east_m_s
+            self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
+            self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
             self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
 
             self.pub.publish(self.sensor_msgs)
