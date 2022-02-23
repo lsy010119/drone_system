@@ -41,9 +41,8 @@ class BehaviorPlanner:
 
         # if recieved the msg, no action is performing now
         self.is_performing_action = False
-        print("action_done")
-        # if recieved the signal that had done the mission, the trigger turns on
-        
+
+        # send the input permission since the mission recieved is done        
         self.pub2ground.publish(True)
         
 
@@ -56,8 +55,6 @@ class BehaviorPlanner:
         self.vel_n, self.vel_e, self.vel_d = \
         telem.vel_n, telem.vel_e, telem.vel_d
 
-        self.yaw_ang, self.yaw_ang_vel = \
-        telem.yaw_ang, telem.yaw_ang_vel
 
     
 
@@ -78,8 +75,6 @@ class BehaviorPlanner:
         while not rospy.is_shutdown():
 
             FSM().transform_state(self)
-
-            print(self.is_performing_action,end="\r")
             self.telem_rate.sleep()
 
         

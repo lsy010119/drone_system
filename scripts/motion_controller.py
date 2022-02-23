@@ -5,6 +5,7 @@ import rospy
 from mavsdk             import System
 from drone_system.msg   import Status
 from std_msgs.msg       import String,Bool,Float32MultiArray
+from mavsdk.offboard    import VelocityNedYaw,PositionNedYaw,OffboardError
 
 
 class MotionController:
@@ -19,31 +20,68 @@ class MotionController:
         
         self.motion_command = None
 
+        self.drone = System()
 
     def motion_update(self,motion_command):
 
        self.motion_command = motion_command.data
 
 
-    async def connect_and_arm(self):
+    async def connect(self):
+
+        # await self.drone.connect(system_address="serial:///dev/ttyUSB0:921600")
+        await self.drone.connect(system_address="udp://:14540")
+
+        print("Connecting in motion...")
+        async for state in self.drone.core.connection_state():
+            if state.is_connected:
+                print(f"Connected in motion              ",end="\r")
+                break
         
-        print("armed")
+
+    async def start_offboard(self):
+
+        print("-- Starting offboard")
+        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
+        await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,0,0))
+        
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: \
+                {error._result.result}")
+            # print("-- Disarming")
+            # await self.drone.action.disarm()
+            return
+
+
+    async def arm(self):
+        
+        print("Armed")
+        await self.drone.action.arm()
+        print("initialize")
+        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
+        await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,0,0))
 
 
     async def disarm(self):
         
-        print("disarmed")
+        print("Disarmed")
+        await self.drone.action.disarm()
 
 
     async def take_off(self):
 
         print("take_off")
+        await self.drone.offboard.set_position_ned(PositionNedYaw(0,0,-10.0,0))
+        await asyncio.sleep(5)
 
 
     async def hold(self):
 
         print("hold")
-
+        await self.drone.offboard.set_velocity_ned(VelocityNedYaw(0,0,0,0))
+        await asyncio.sleep(1)
     
     async def land(self):
 
@@ -55,7 +93,12 @@ class MotionController:
         print("tracking")
 
 
-    async def main(self):
+    async def is_done(self):
+
+        self.pub2fsm.publish(True)
+
+
+    async def action_handler(self):
 
         while not rospy.is_shutdown():
 
@@ -67,43 +110,39 @@ class MotionController:
                     if self.motion_command == "arm":
                         
                         self.motion_command = None
-                        await self.connect_and_arm()
-                        
-                        self.pub2fsm.publish(True)
+                        await self.arm()
+                        await self.is_done()
 
 
                     elif self.motion_command == "disarm":
 
                         self.motion_command = None
                         await self.disarm()
-
-                        self.pub2fsm.publish(True)
+                        await self.is_done()
 
 
                     elif self.motion_command == "take_off":
 
                         self.motion_command = None
+                        await self.start_offboard()
                         await self.take_off()
-
-                        self.pub2fsm.publish(True)
+                        await self.is_done()
                         
 
                     elif self.motion_command == "hold":
 
                         self.motion_command = None
                         await self.hold()
-
-                        self.pub2fsm.publish(True)
+                        # await self.is_done()
 
 
                 else: # if it is the mission requirs planning a trajectory
 
-                    print(self.motion_command)
-                    print(type(self.motion_command))
+
                     # "0" means that it didnt reached to the destination
                     if self.motion_command[0] == 0: 
                         
-                        self.trajectory_tracking(self.motion_command[1:])
+                        await self.trajectory_tracking(self.motion_command[1:])
 
                         # send a signal if the drone had done
                         # tracking the trajectory recieved
@@ -112,11 +151,17 @@ class MotionController:
                     # "1" means that its a final trajectory for the destination
                     elif self.motion_command[0] == 1:
 
-                        self.trajectory_tracking(self.motion_command[1:])
+                        await self.trajectory_tracking(self.motion_command[1:])
 
                         # send a signal if the drone had done
                         # the mission recieved
-                        self.pub2fsm.publish(True)
+                        await self.is_done()
+
+
+    async def main(self):
+
+        await self.connect()
+        await self.action_handler()
 
 
 if __name__ == "__main__":
