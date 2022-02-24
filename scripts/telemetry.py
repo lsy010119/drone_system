@@ -43,7 +43,6 @@ class Telemetry:
             self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
             self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
             self.sensor_msgs.vel_d = posvelned.velocity.down_m_s
-            print(-posvelned.position.down_m)
             self.pub.publish(self.sensor_msgs)
             self.rate.sleep()    
 

@@ -15,7 +15,7 @@ class MotionController:
         rospy.init_node("motion_controller")
         rospy.Subscriber("/motion_msgs",String,self.motion_update)
         rospy.Subscriber("/trajec_msgs",Float32MultiArray,self.motion_update)
-        self.pub2trajec = rospy.Publisher("/trajectory_request",Bool,queue_size=1)
+        self.pub2trajec = rospy.Publisher("/trajec_request",Bool,queue_size=1)
         self.pub2fsm = rospy.Publisher("/is_done",Bool,queue_size=1)
         self.motion_rate = 10 #hz
 

@@ -196,6 +196,7 @@ class FSM:
         elif data_hub.cur_state == "take_off":
         
             self.transform_take_off(data_hub)
+
         
         elif data_hub.cur_state == "hold":
         

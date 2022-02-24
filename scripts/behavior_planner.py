@@ -5,6 +5,7 @@ from drone_system.msg   import Status
 from std_msgs.msg       import String
 from std_msgs.msg       import Bool
 
+
 class BehaviorPlanner:
 
 
@@ -29,11 +30,8 @@ class BehaviorPlanner:
         # to handle the mission input. while the drone is performing any mission,
         # user cant input a mission
         self.pub2ground = rospy.Publisher("/input_permission", Bool, queue_size=1)
-        
-        self.telem_rate = rospy.Rate(10)
-        self.img_rate = rospy.Rate(10)
-        self.trajectory_rate = rospy.Rate(10)
 
+        self.telem_rate = rospy.Rate(10)
 
 
     def action_done(self,msg):
@@ -53,7 +51,6 @@ class BehaviorPlanner:
         
         self.vel_n, self.vel_e, self.vel_d = \
         telem.vel_n, telem.vel_e, telem.vel_d
-
 
     
 
