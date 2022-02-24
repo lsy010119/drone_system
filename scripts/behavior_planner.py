@@ -2,8 +2,7 @@
 import rospy
 from fsm                import FSM
 from drone_system.msg   import Status
-from std_msgs.msg       import String
-from std_msgs.msg       import Bool
+from std_msgs.msg       import String,Bool,Float32MultiArray
 
 
 class BehaviorPlanner:
@@ -18,15 +17,15 @@ class BehaviorPlanner:
 
         # init current state in fsm
         self.cur_state = "disarm"
-        # init current mission performing
-        self.mission = "disarm"
+        # init current mission recieved
+        self.mission = 0
         # to prevent starting the same mission continuously
         self.transform_trigger = False
         # whether the drone is performing any action
         self.is_performing_action = False
 
         # to send a action to do ( ex) "take_off", "land")
-        self.pub2trajec = rospy.Publisher("/action_msgs", String, queue_size=1)
+        self.pub2trajec = rospy.Publisher("/action_msgs", Float32MultiArray, queue_size=1)
         # to handle the mission input. while the drone is performing any mission,
         # user cant input a mission
         self.pub2ground = rospy.Publisher("/input_permission", Bool, queue_size=1)
@@ -65,7 +64,7 @@ class BehaviorPlanner:
     def main(self):
 
         rospy.Subscriber("/sensor_msgs", Status, self.status_update) # from telemetry
-        rospy.Subscriber("/mission_msgs", String, self.mission_update) # from ground_station
+        rospy.Subscriber("/mission_msgs", Float32MultiArray, self.mission_update) # from ground_station
         rospy.Subscriber("/is_done", Bool, self.action_done) # from motion_controller
     
         while not rospy.is_shutdown():

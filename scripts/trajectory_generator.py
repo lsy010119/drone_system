@@ -14,11 +14,10 @@ class TrajectoryGenerator:
         self.path = Path_Generator()        
 
         rospy.init_node("trajectory_generator")
-        rospy.Subscriber("/action_msgs", String, self.action_update)
+        rospy.Subscriber("/action_msgs", Float32MultiArray, self.action_update)
         rospy.Subscriber("/sensor_msgs", Status, self.action_update)
-        rospy.Subscriber("/trjec_request", Bool, self.action_update)
-        self.pub2motion_motion = rospy.Publisher("/motion_msgs", String,queue_size=1)
-        self.pub2motion_trajec = rospy.Publisher("/trajec_msgs", Float32MultiArray,queue_size=1)
+        rospy.Subscriber("/trajec_request", Bool, self.action_update)
+        self.pub2motion = rospy.Publisher("/motion_msgs", Float32MultiArray,queue_size=1)
         
         self.current_status = None
         self.action = None
@@ -49,19 +48,20 @@ class TrajectoryGenerator:
 
             if self.action != None:
 
-                if self.action in ["arm","disarm","land"]:
+                if self.action[0] in [0,1,3]:
                     
                     print(self.action)
                     self.pub2motion_motion.publish(self.action) 
                     # if the mission is simple, pass the mission to motion controller
                     self.action = None
 
-                elif self.action == "take_off":
+                elif self.action[0] == 2: # take_off mission
 
                     print(self.action)
 
+                    self.path.generate(self.current_status,self.action)
 
-
+                    self.action = None
                     
 
                 elif self.action == "park":
