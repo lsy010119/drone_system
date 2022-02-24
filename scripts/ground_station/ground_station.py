@@ -25,7 +25,8 @@ class GroundStation:
             
             if self.input_avaliable == True:
                 
-                mission = input("Mission : ")
+                mission = input("===============Mission Input================\n\
+0 : arm\n1 : disarm\n2 : take_off\n3 : land\n4 : park\n5 : search\nInput Mission No : ")
                 self.input_avaliable = False
                 print(self.input_avaliable)
                 self.pub2datahub.publish(mission)
